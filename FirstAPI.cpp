@@ -3,6 +3,7 @@
 #include <string>
 #include <Windows.h>
 
+std::string trim(std::string str1);
 
 struct Person {
     std::string firstName;
@@ -10,9 +11,9 @@ struct Person {
     std::string phoneNumber;
 
     void fromString(std::string json) {
-        firstName = getValue(json, "\"firstName\"");
-        lastName = getValue(json, "\"lastName\"");
-        phoneNumber = getValue(json, "\"phoneNumber\"");
+        firstName = trim(getValue(json, "firstName"));
+        lastName = trim(getValue(json, "lastName"));
+        phoneNumber = trim(getValue(json, "phoneNumber"));
     }
 
     std::string getValue(std::string json, std::string name_param) {
@@ -71,50 +72,78 @@ void doJSON1() {
     phoneNumber = any_person.getValue(myjson, "\"phoneNumber\"");
 
     std::cout << firstName << " " << lastName << " " << phoneNumber << "\n";
-
-
-    /*
-    std::string name_param = "\"firstName\"";
-    int pos1 =  myjson.find(name_param);
-    pos1 += name_param.length() + 2;
-    //int pos2 = myjson.substr(pos1).find(",") + pos1; // pos1 - лишнее (сначала добавили)
-    //std::cout << pos1 << " " << pos2 << std::endl;
-    //std::cout << myjson.substr(pos1, pos2 - pos1);  // pos1 - лишнее (потом отняли)
-    std::cout << myjson.substr(pos1, myjson.substr(pos1).find(","));
-    //std::cout << (int)myjson.find("Tomas") << std::endl;
-    */
-
-    //std::cout << myjson.find("\"lastName\"") << std::endl;
-    //std::cout << myjson.find("\"phoneNumber\"") << std::endl;
 }
 
-
-
-
-int main(int argc, char* argv[]) {   
-    setlocale(LC_ALL, "ru");
-    SetConsoleCP(1251);
-
-    std::string myjson;/* = "{";
-    myjson += "\"firstName\": \"Иван\",";
-    myjson += "\"lastName\": \"Иванов\",";
-    myjson += "\"phoneNumber\": \"812 123-1234\",";
-    myjson += "}";*/
+std::string read_JSONfomFile(std::string filename) {
+    std::string myjson;
     std::ifstream fin;
-    fin.open("pesrsons.txt");
+    fin.open(filename);
+    std::string line;
     if (fin.is_open()) {
         while (!fin.eof()) {
-            std::getline(fin, myjson);
+            std::getline(fin, line);
+            myjson += line;
             std::cout << myjson << std::endl;
         }
     }
     else {
         std::cout << "Error! can not open the file." << std::endl;
     }
+    return myjson;
+}
 
-    //std::cout << myjson << std::endl;
-
+void doIt(int argc, char* argv[]) {
+    std::string filename;
+    for (int k = 0; k < argc; k++) {
+        if (strcmp(argv[k], "-rf") == 0) {
+            if (k + 1 < argc) {
+                filename = argv[k + 1];
+            }
+        }
+    }
+    std::string myjson = read_JSONfomFile(filename);
     Person any_person;
     any_person.fromString(myjson);
     any_person.show();
+}
+
+std::string trim(std::string str1) {
+    int pos1 = 0, pos2 = str1.size() - 1;
+    for (int k = 0; k < str1.size(); k++) {
+        if (str1[k] != ' ' || str1[k] != '\n' || str1[k] != '\t') {
+            pos1 = k;
+            break;
+        }
+    }
+    for (int k = str1.size() - 1; k > pos1; k--) {
+        if (str1[k] != ' ') {
+            pos2 = k;
+            break;
+        }
+    }
+    return str1.substr(pos1, pos2 - pos1 + 1);
+}
+
+void test_trim() {
+    std::string str1 = "str ing";
+    std::string str2 = "string";
+    std::string str3 = "";
+
+    // variant 1 не подходит так как удаляет пробелы в середине строки
+/*
+    for (int k = 0; k < str1.size(); k++) {
+        if (str1[k] != ' ' || str1[k] != '\n' || str1[k] != '\t') {
+            str3.push_back(str1[k]);
+        }
+    }
+*/
+//variant 2
+    std::cout << "|" << trim(str1) << "|" << std::endl;
+}
+
+
+int main(int argc, char* argv[]) {        
+    setlocale(LC_ALL, "ru");
+    SetConsoleCP(1251);
+    doIt(argc, argv);
 }

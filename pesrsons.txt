@@ -1,1 +1,2 @@
-{"firstName": "Иван","lastName": "Иванов","phoneNumber": "812 123-1234",}
+{firstName: Иван ,                 phoneNumber: 812 123-1234, 
+  lastName: Иванов,    "newkey": This is new kew,   }
